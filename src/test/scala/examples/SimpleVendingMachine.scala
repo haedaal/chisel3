@@ -19,8 +19,13 @@ abstract class SimpleVendingMachine extends Module {
   assert(!(io.nickel && io.dime), "Only one of nickel or dime can be input at a time!")
 }
 
+object FSMVendingMachine {
+  def apply() = new FSMVendingMachine
+}
+
 // Vending machine implemented with a Finite State Machine
 class FSMVendingMachine extends SimpleVendingMachine {
+  println(s"[DEBUG] In Constructor of FSMVendingMachine")
   val sIdle :: s5 :: s10 :: s15 :: sOk :: Nil = Enum(5)
   val state = RegInit(sIdle)
 
@@ -45,6 +50,7 @@ class FSMVendingMachine extends SimpleVendingMachine {
       state := sIdle
     }
   }
+
   io.dispense := (state === sOk)
 }
 
@@ -69,7 +75,8 @@ class VerilogVendingMachineWrapper extends SimpleVendingMachine {
 // Accept a reference to a SimpleVendingMachine so it can be constructed inside
 // the tester (in a call to Module.apply as required by Chisel
 class SimpleVendingMachineTester(mod: => SimpleVendingMachine) extends BasicTester {
-
+  println(s"[DEBUG] In Constructor of Tester")
+  println(s"[DEBUG] In Constructor of Tester, before 1st mod")
   val dut = Module(mod)
 
   val (cycle, done) = Counter(true.B, 10)
@@ -82,6 +89,11 @@ class SimpleVendingMachineTester(mod: => SimpleVendingMachine) extends BasicTest
   dut.io.nickel := nickelInputs(cycle)
   dut.io.dime := dimeInputs(cycle)
   assert(dut.io.dispense === expected(cycle))
+
+  println(s"[DEBUG] In Constructor of Tester, before 2nd mod")
+  val dut2 = Module(mod)
+  dut2.io.nickel := nickelInputs(cycle)
+  dut2.io.dime := dimeInputs(cycle)
 }
 
 class SimpleVendingMachineSpec extends ChiselFlatSpec {
@@ -92,4 +104,10 @@ class SimpleVendingMachineSpec extends ChiselFlatSpec {
     assertTesterPasses(new SimpleVendingMachineTester(new VerilogVendingMachineWrapper),
                        List("/chisel3/VerilogVendingMachine.v"))
   }
+  "Compile" should "compile once per a module" in {
+    val firrtl = generateFirrtl( new SimpleVendingMachineTester(FSMVendingMachine()))
+    println(firrtl)
+  }
 }
+
+

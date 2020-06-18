@@ -59,6 +59,7 @@ abstract class RawModule(implicit moduleCompileOptions: CompileOptions)
 
 
   private[chisel3] override def generateComponent(): Component = { // scalastyle:ignore cyclomatic.complexity
+    println(s"[DEBUG] @RawModule.generateComponent : ${name}")
     require(!_closed, "Can't generate module more than once")
     _closed = true
 

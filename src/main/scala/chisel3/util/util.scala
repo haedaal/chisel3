@@ -11,4 +11,7 @@ package object util {
   type ValidIO[+T <: Data] = chisel3.util.Valid[T]
   val ValidIO = chisel3.util.Valid
   val DecoupledIO = chisel3.util.Decoupled
+
+  class Functional(moduleName: String) extends scala.annotation.StaticAnnotation
 }
+

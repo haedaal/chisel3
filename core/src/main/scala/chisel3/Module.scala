@@ -30,6 +30,7 @@ object Module extends SourceInfoDoc {
   def do_apply[T <: BaseModule](bc: => T)
                                (implicit sourceInfo: SourceInfo,
                                          compileOptions: CompileOptions): T = {
+
     if (Builder.readyForModuleConstr) {
       throwException("Error: Called Module() twice without instantiating a Module." +
                      sourceInfo.makeMessage(" See " + _))
@@ -38,6 +39,13 @@ object Module extends SourceInfoDoc {
 
     val parent = Builder.currentModule
     val whenDepth: Int = Builder.whenDepth
+
+    parent match {
+      case Some(m) =>
+        println(s"[DEBUG] @Module.apply : ${m.name}")
+      case _ =>
+        println(s"[DEBUG] @Module.apply : How parent module does not exits?")
+    }
 
     // Save then clear clock and reset to prevent leaking scope, must be set again in the Module
     val (saveClock, saveReset)  = (Builder.currentClock, Builder.currentReset)
